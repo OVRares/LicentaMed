@@ -1,14 +1,12 @@
 import { Route, Routes } from "react-router-dom";
 import LoginPage from "./Pages/LoginPage";
 import SignUpPage from "./Pages/SignUpPage";
-import MainPage from "./Pages/MainPage";
 import LoginPageDoc from "./Pages/LoginPageDoc";
 import SignUpPageDoc from "./Pages/SignUpPageDoc";
 import ConfirmationPageTest from "./Pages/ConfirmationPageTest";
 import SearchPageTest from "./Pages/SearchPageTest";
 import Profile from "./Pages/Profile";
 import ChatPage from "./Pages/ChatPage";
-import ChatList from "./Pages/ChatList";
 import ChatSplitPage from "./Pages/ChatSplitPage";
 import ChatSplitPageReg from "./Pages/ChatSplitPageReg";
 import DoctorAppointmentsPage from "./Pages/DoctorAppointmentsPage";
@@ -29,12 +27,10 @@ function App() {
         <Route path="/signupDoc" element={<SignUpPageDoc />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/loginDoc" element={<LoginPageDoc />} />
-        <Route path="/main" element={<MainPage />} />
         <Route path="/tconfirmation" element={<ConfirmationPageTest />} />
         <Route path="/search" element={<SearchPageTest />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/chat/:channelId" element={<ChatPage />} />
-        <Route path="/chats" element={<ChatList />} />
         <Route path="/splitchats" element={<ChatSplitPage />} />
         <Route path="/rsplitchats" element={<ChatSplitPageReg />} />
         <Route path="/testscheduler" element={<AppointmentGridModal />} />

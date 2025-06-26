@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "start-backend": "nodemon --exec tsx src/backend/server.ts"
+    "start-backend": "nodemon --exec tsx src/backend/server.ts",
+    "start": "concurrently -n FRONTEND,BACKEND -c blue,green \"npm run dev\" \"npm run start-backend\""
   },
   "dependencies": {
     "@aldabil/react-scheduler": "^3.1.2",
@@ -52,6 +53,7 @@
     "@types/react-dom": "^18.0.10",
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.2.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^4.9.5",

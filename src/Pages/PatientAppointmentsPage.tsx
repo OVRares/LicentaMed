@@ -203,17 +203,11 @@ const PatientAppointmentsPage = () => {
         </header>
 
         <div className="doc-appointments-page">
-          {/* 2-column flex layout */}
           <div className="doc-appointments-layout">
-            {/* ─────────────────── 1) APPOINTMENTS LIST (left / grows) ─────────────────── */}
-
             <section className="doc-appointments-container">
               <h2 className="doc-appointments-title">Programări</h2>
 
-              {/* toggle completed ↔︎ pending/confirmed */}
-              {/* --- controls row: view-toggle + type filter --- */}
               <div className="doc-appointments-controls">
-                {/* Dropdown aligned left */}
                 <select
                   className="doc-appointments-select"
                   value={selectedType ?? ""}
