@@ -6,6 +6,7 @@ declare module "express-session" {
       uid: string;
       email: string;
       role: string;
+      name: string;
     };
   }
 }

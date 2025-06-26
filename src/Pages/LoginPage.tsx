@@ -61,16 +61,15 @@ function LoginPage() {
         console.log("Login successful");
 
         const tokenResponse = await axios.post(
-          "http://localhost:5000/api/chat/token-from-db",
+          "http://localhost:5000/api/chat/chatStartReg",
           { email: email },
           { withCredentials: true }
         );
-        console.log("Stream Token Response:", tokenResponse);
+        console.log("Stream Token Response:", tokenResponse.data);
 
         if (tokenResponse.status === 200) {
           const { token, user } = tokenResponse.data;
 
-          // Store the Stream token and user info in localStorage
           localStorage.setItem("streamToken", token);
           console.log("Stream Token:", token);
           localStorage.setItem("streamUser", JSON.stringify(user));
@@ -78,8 +77,7 @@ function LoginPage() {
           const client = StreamChat.getInstance("vs9hb5583yhf");
           await client.connectUser(user, token);
 
-          // Step 5: Navigate to the main page
-          navigate("/main");
+          navigate("/main2");
         } else {
           setAlertText("Failed to get Stream token. Please try again.");
           setAlertVisibility(true);
@@ -95,73 +93,99 @@ function LoginPage() {
 
   return (
     <>
-      <header className="header">
-        <div className="header-left">
-          <img src="src/assets/logo.png" alt="Company Logo" className="logo" />
-        </div>
-        <div className="header-center"></div>
-      </header>
+      <div className="page-wrapper">
+        <div className="login-page-background">
+          <header className="header">
+            <div className="header-left">
+              <img
+                src="src/assets/Minerva2.png"
+                alt="Company Logo"
+                className="logo"
+              />
+            </div>
+            <div className="header-center"></div>
+          </header>
 
-      <div className="center-container">
-        <div className="login-box">
-          <div className="title-row">
-            <img src="src/assets/logo.png" alt="Logo" className="logo" />
-            <h2 className="login-title">Placeholder - Login</h2>
+          <div className="center-container">
+            <div className="login-box">
+              <div className="title-row">
+                <h2 className="login-title">Login to MinervaMed</h2>
+              </div>
+
+              <div className="redirect-buttons">
+                <Button
+                  onClick={() => navigate("/login")}
+                  color="blue"
+                  variant="filled"
+                  selected={
+                    location.pathname === "/login" || location.pathname === "/"
+                  }
+                  icon={
+                    location.pathname === "/login" || location.pathname === "/"
+                      ? "src/assets/pacient-set.png"
+                      : "src/assets/pacient.png"
+                  }
+                >
+                  Login Pacient
+                </Button>
+                <Button
+                  onClick={() => navigate("/loginDoc")}
+                  color="blue"
+                  selected={location.pathname === "/doctor-login"}
+                  variant="filled"
+                  icon={
+                    location.pathname === "/doctor-login"
+                      ? "src/assets/doctor-set.png"
+                      : "src/assets/doctor.png"
+                  }
+                  hoverIcon="src/assets/doctor-set.png"
+                >
+                  Login Doctor
+                </Button>
+              </div>
+
+              <div className="separator"></div>
+              <TextBox
+                value={email}
+                onChange={(text) => setEmail(text)}
+                placeholder="E-Mail"
+              ></TextBox>
+              <TextBox
+                value={parola}
+                onChange={(text) => setParola(text)}
+                placeholder="Parola"
+                type="password"
+                onKeyDown={handleKeyDown}
+              ></TextBox>
+              <Button onClick={handleSignIn} type="submit" color="blue">
+                Log In
+              </Button>
+
+              <ClickLink redirectTo="/signup" />
+
+              {alertText && <Alert message={alertText} />}
+            </div>
           </div>
-
-          <div className="redirect-buttons">
-            <Button
-              onClick={() => navigate("/login")}
-              color="blue"
-              variant="filled"
-              selected={
-                location.pathname === "/login" || location.pathname === "/"
-              }
-              icon={
-                location.pathname === "/login" || location.pathname === "/"
-                  ? "src/assets/pacient-set.png"
-                  : "src/assets/pacient.png"
-              }
-            >
-              Login Pacient
-            </Button>
-            <Button
-              onClick={() => navigate("/loginDoc")}
-              color="blue"
-              selected={location.pathname === "/doctor-login"}
-              variant="filled"
-              icon={
-                location.pathname === "/doctor-login"
-                  ? "src/assets/doctor-set.png"
-                  : "src/assets/doctor.png"
-              }
-              hoverIcon="src/assets/doctor-set.png"
-            >
-              Login Doctor
-            </Button>
-          </div>
-
-          <div className="separator"></div>
-          <TextBox
-            value={email}
-            onChange={(text) => setEmail(text)}
-            placeholder="E-Mail"
-          ></TextBox>
-          <TextBox
-            value={parola}
-            onChange={(text) => setParola(text)}
-            placeholder="Parola"
-            type="password"
-            onKeyDown={handleKeyDown}
-          ></TextBox>
-          <Button onClick={handleSignIn} type="submit" color="blue">
-            Log In
-          </Button>
-
-          <ClickLink redirectTo="/signup" />
-
-          {alertText && <Alert message={alertText} />}
         </div>
+
+        <footer className="footer">
+          <div className="footer-container">
+            <div className="footer-column">
+              <h4>About Us</h4>
+              <p>
+                MinervaMed is a modern healthcare platform that connects
+                patients and doctors with ease. We strive to simplify medical
+                appointments, communication, and care.
+              </p>
+            </div>
+
+            <div className="footer-column">
+              <h4>Contact</h4>
+              <p>📞 Phone: +40 123 456 789</p>
+              <p>📧 Email: contact@minervamed.ro</p>
+            </div>
+          </div>
+        </footer>
       </div>
     </>
   );

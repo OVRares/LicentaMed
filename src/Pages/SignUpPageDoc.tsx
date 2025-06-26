@@ -25,6 +25,7 @@ function SignUpPageDoc() {
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [county, setCounty] = useState("");
+  const [officeCode, setOfficeCode] = useState("");
   const navigate = useNavigate();
 
   const getPlaceholder = () => {
@@ -51,6 +52,12 @@ function SignUpPageDoc() {
     } else if (!prenume.trim()) {
       setAlertText("Prenumele nu poate fi gol!");
       return;
+    } else if (!spec) {
+      setAlertText("Trebuie să selectați o specialitate!");
+      return;
+    } else if (!spec_id.trim()) {
+      setAlertText("Codul de identificare (CMR/CSMR/CFZRO) nu poate fi gol!");
+      return;
     } else if (!email.trim()) {
       setAlertText("Emailul nu poate fi gol!");
       return;
@@ -59,6 +66,7 @@ function SignUpPageDoc() {
       return;
     } else if (!password.trim()) {
       setAlertText("Parola nu poate fi goala!");
+      return;
     } else if (password !== passwordCheck) {
       setAlertText("Parolele nu se potrivesc!");
       return;
@@ -79,51 +87,13 @@ function SignUpPageDoc() {
   };
 
   const signupFinal = async () => {
-    if (!officeName.trim()) {
-      setAlertText("Denumirea cabinetului nu poate fi goala!");
-    } else if (!city.trim()) {
-      setAlertText("Orasul nu poate fi gol!");
-    } else if (!address.trim()) {
-      setAlertText("Adresa nu poate fi goala!");
-    } else if (!phone.trim()) {
-      setAlertText("Numarul de telefon nu poate fi gol!");
-    } else {
-      setAlertVisibility(false);
-
-      const id: string = Math.floor(
-        10000000 + Math.random() * 90000000
-      ).toString();
-
-      const off_id: string = Math.floor(
-        10000000 + Math.random() * 90000000
-      ).toString();
-
-      // const emailParams = {
-      //   to_email: email, // The user's email address
-      //   user_nume: nume, // User's first name
-      //   user_prenume: prenume, // User's last name
-      //   user_cnp: cnp, // User's CNP
-      //   user_dob: `${dob.day} ${dob.month} ${dob.year}`, // User's Date of Birth
-      //   user_id: randomId,
-      // };
-
-      // await emailjs.send(
-      //   "service_xe121us", // Replace with your Email.js service ID
-      //   "template_6l48wfv", // Replace with your Email.js template ID
-      //   emailParams,
-      //   "aKbIrt8jhzXZx9LDI" // Replace with your Email.js user ID
-      // );
-
-      //console.log("Email sent successfully!");
+    // branch 1 ─────────── doctor joins existing office
+    if (officeCode.trim()) {
       try {
+        const id = `DOC${Math.floor(10000000 + Math.random() * 9_000000)}`;
+
         await axios.post("http://localhost:5000/signupDoctorWithOffice", {
-          office_id: off_id,
-          office_nume: officeName,
-          office_judet: county,
-          office_oras: city,
-          office_adr: address,
-          office_tel: phone,
-          office_spec: spec,
+          office_id: officeCode.trim(), // <- supplied code
           user_id: id,
           user_nume: nume,
           user_prenume: prenume,
@@ -133,116 +103,184 @@ function SignUpPageDoc() {
           user_parola: password,
         });
 
-        setAlertText("Contul a fost creat cu succes!");
         navigate("/loginDoc");
-      } catch (error) {
-        setAlertText("A aparut o eroare la inregistrare!");
+      } catch (e) {
+        setAlertText("Codul de cabinet nu a fost găsit!");
       }
+      return;
+    }
+
+    // branch 2 ─────────── create new office (phone removed)
+    if (!officeName.trim()) {
+      setAlertText("Denumirea cabinetului nu poate fi goala!");
+      return;
+    }
+    if (!city.trim()) {
+      setAlertText("Orasul nu poate fi gol!");
+      return;
+    }
+    if (!address.trim()) {
+      setAlertText("Adresa nu poate fi goala!");
+      return;
+    }
+
+    const office_id = Math.floor(
+      10000000 + Math.random() * 9_000000
+    ).toString();
+    const user_id = `DOC${Math.floor(10000000 + Math.random() * 9_000000)}`;
+
+    try {
+      await axios.post("http://localhost:5000/signupDoctorWithOffice", {
+        office_id,
+        office_nume: officeName,
+        office_judet: county,
+        office_oras: city,
+        office_adr: address,
+        user_id,
+        user_nume: nume,
+        user_prenume: prenume,
+        user_email: email,
+        user_spec: spec,
+        user_spec_id: spec_id,
+        user_parola: password,
+      });
+
+      navigate("/loginDoc");
+    } catch {
+      setAlertText("A apărut o eroare la înregistrare!");
     }
   };
 
   return (
     <>
-      <header className="header">
-        <div className="header-left">
-          <img src="src/assets/logo.png" alt="Company Logo" className="logo" />
+      <div className="page-wrapper">
+        <header className="header">
+          <div className="header-left">
+            <img
+              src="src/assets/logo.png"
+              alt="Company Logo"
+              className="logo"
+            />
+          </div>
+          <div className="header-center"></div>
+        </header>
+
+        <div className="center-container">
+          {step === 1 ? (
+            <>
+              <div className="signup-box-doc">
+                <h2 className="signup-step-title">Informații Personale</h2>
+                <TextBox
+                  value={nume}
+                  onChange={(text) => setNume(text)}
+                  placeholder="Nume"
+                ></TextBox>
+                <TextBox
+                  value={prenume}
+                  onChange={(text) => setPrenume(text)}
+                  placeholder="Prenume"
+                ></TextBox>
+
+                <SpecPicker value={spec} onOptionSelect={handleOptionSelect} />
+                <TextBox
+                  value={spec_id}
+                  onChange={(text) => setSpecId(text)}
+                  placeholder="Cod Registru Unic Național"
+                ></TextBox>
+
+                <TextBox
+                  value={email}
+                  onChange={(text) => setEmail(text)}
+                  placeholder="E-Mail"
+                ></TextBox>
+
+                <TextBox
+                  value={password}
+                  onChange={(text) => setPassword(text)}
+                  placeholder="Parola"
+                  type="password"
+                />
+
+                <TextBox
+                  value={passwordCheck}
+                  onChange={(text) => setPasswordCheck(text)}
+                  placeholder="Confirmati Parola"
+                  type="password"
+                />
+
+                <Button onClick={handleNextStep} color="blue">
+                  Urmator
+                </Button>
+
+                {alertText && <Alert message={alertText} />}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="page-wrapper"></div>
+              <div className="signup-box-office">
+                <h2 className="signup-step-title">Informații Cabinet</h2>
+                <TextBox
+                  value={officeName}
+                  onChange={(text) => setOfficeName(text)}
+                  placeholder="Denumire Cabinet"
+                />
+
+                <JudetPicker value={county} onOptionSelect={setCounty} />
+
+                <TextBox
+                  value={city}
+                  onChange={(text) => setOfficeCity(text)}
+                  placeholder="Oras"
+                />
+                <TextBox
+                  value={address}
+                  onChange={(text) => setAddress(text)}
+                  placeholder="Adresa"
+                />
+
+                {/* Separator */}
+                <div className="or-separator">
+                  <hr className="line" />
+                  <span className="or-label">SAU</span>
+                  <hr className="line" />
+                </div>
+
+                {/* Existing Office Code */}
+                <TextBox
+                  value={officeCode}
+                  onChange={setOfficeCode}
+                  placeholder="Cod cabinet (opțional)"
+                />
+
+                <Button onClick={signupFinal} color="blue">
+                  Confirm & Register
+                </Button>
+
+                {alertText && <Alert message={alertText} />}
+              </div>
+            </>
+          )}
         </div>
-        <div className="header-center"></div>
-      </header>
 
-      <div className="center-container">
-        {step === 1 ? (
-          <>
-            <img
-              src="src/assets/doc-alt.jpg"
-              alt="Login Image"
-              className="login-image-1"
-            />
-            <div className="signup-box-doc">
-              <TextBox
-                value={nume}
-                onChange={(text) => setNume(text)}
-                placeholder="Nume"
-              ></TextBox>
-              <TextBox
-                value={prenume}
-                onChange={(text) => setPrenume(text)}
-                placeholder="Prenume"
-              ></TextBox>
-
-              <SpecPicker value={spec} onOptionSelect={handleOptionSelect} />
-              <TextBox
-                value={spec_id}
-                onChange={(text) => setSpecId(text)}
-                placeholder={getPlaceholder()}
-              ></TextBox>
-
-              <TextBox
-                value={email}
-                onChange={(text) => setEmail(text)}
-                placeholder="E-Mail"
-              ></TextBox>
-
-              <TextBox
-                value={password}
-                onChange={(text) => setPassword(text)}
-                placeholder="Parola"
-                type="password"
-              />
-
-              <TextBox
-                value={passwordCheck}
-                onChange={(text) => setPasswordCheck(text)}
-                placeholder="Confirmati Parola"
-                type="password"
-              />
-
-              <Button onClick={handleNextStep} color="blue">
-                Urmator
-              </Button>
-
-              {alertText && <Alert message={alertText} />}
+        <footer className="footer">
+          <div className="footer-container">
+            <div className="footer-column">
+              <h4>About Us</h4>
+              <p>
+                MinervaMed is a modern healthcare platform that connects
+                patients and doctors with ease. We strive to simplify medical
+                appointments, communication, and care.
+              </p>
             </div>
-          </>
-        ) : (
-          <>
-            <img
-              src="src/assets/office_signup_2.jpg"
-              alt="Login Image"
-              className="login-image-2"
-            />
 
-            <div className="signup-box-office">
-              <TextBox
-                value={officeName}
-                onChange={(text) => setOfficeName(text)}
-                placeholder="Denumire Cabinet"
-              />
-
-              <JudetPicker value={county} onOptionSelect={setCounty} />
-
-              <TextBox
-                value={city}
-                onChange={(text) => setOfficeCity(text)}
-                placeholder="Oras"
-              />
-              <TextBox
-                value={address}
-                onChange={(text) => setAddress(text)}
-                placeholder="Adresa"
-              />
-              <TextBox
-                value={phone}
-                onChange={(text) => setPhone(text)}
-                placeholder="Telefon"
-              />
-              <Button onClick={signupFinal} color="blue">
-                Confirm & Register
-              </Button>
-              {alertText && <Alert message={alertText} />}
+            <div className="footer-column">
+              <h4>Contact</h4>
+              <p>📞 Phone: +40 123 456 789</p>
+              <p>📧 Email: contact@minervamed.ro</p>
             </div>
-          </>
-        )}
+          </div>
+        </footer>
       </div>
     </>
   );

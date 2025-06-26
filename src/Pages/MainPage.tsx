@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../App.css";
 import axios from "axios";
 import Button from "../components/Button";
-import Header from "../components/Header";
+import { StreamChat } from "stream-chat";
 
 function MainPage() {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/main";
   const navigate = useNavigate();
   const [user, setUser] = useState<null | {
     uid: string;
@@ -17,6 +19,23 @@ function MainPage() {
 
   const handleLogout = async (): Promise<void> => {
     try {
+      const client = StreamChat.getInstance("vs9hb5583yhf");
+
+      if (client.userID) {
+        await client.disconnectUser();
+        console.log("Disconnected from StreamChat");
+      }
+
+      // const del = await axios.post(
+      //   "http://localhost:5000/api/chat/delete-test-users",
+      //   {},
+      //   {
+      //     withCredentials: true,
+      //   }
+      // );
+
+      // console.log("Delete response:", del.data);
+
       const response = await axios.post(
         "http://localhost:5000/logout",
         {},
@@ -66,35 +85,54 @@ function MainPage() {
 
   return (
     <>
-      <header className="header">
-        <img src="/logo.png" alt="Logo" />
+      <header className={`header ${isHomePage ? "" : ""}`}>
+        <img src="src/assets/Minerva2.png" alt="Logo" className="logo" />
 
         {user ? (
           <>
-            <Button onClick={() => navigate("/appointments")}>
-              {user.role === "doc" ? "Pacienții mei" : "Programările mele"}
+            <Button
+              width="160px"
+              onClick={() =>
+                navigate(
+                  user.role === "doc"
+                    ? "/appointments_doc"
+                    : "/appointments_reg"
+                )
+              }
+            >
+              Programările mele
             </Button>
-
-            <Button onClick={() => navigate("/chatlist")}>
-              {user.role === "doc" ? "Lista Chat" : "Lista Chat"}
+            <Button
+              width="160px"
+              onClick={() =>
+                navigate(user.role === "doc" ? "/splitchats" : "/rsplitchats")
+              }
+            >
+              Chat
             </Button>
-
-            <Button onClick={() => navigate("/chat")}>
-              {user.role === "doc" ? "Chat Doc" : "Chat Reg"}
+            <Button
+              width="160px"
+              onClick={() =>
+                navigate(user.role === "doc" ? "/scheduler" : "/search")
+              }
+            >
+              {user.role === "doc" ? "Calendarul Meu" : "Cautare Doctor"}
             </Button>
-
-            <Button onClick={handleLogout}>Logout</Button>
+            <Button width="80px" onClick={handleLogout}>
+              Logout
+            </Button>
           </>
         ) : (
           <Button onClick={() => navigate("/login")}>Login</Button>
         )}
       </header>
 
-      <div className="center-container">
-        <p>User ID: {user?.uid}</p>
-        <p>Email: {user?.email}</p>
-        <p>Role: {user?.role}</p>
-        <Button onClick={handleLogout}>Log Out</Button>
+      <div className="hero-banner">
+        <div className="hero-text-box">
+          <h1 className="welcome-heading">Hello, {user?.uid}</h1>
+          <p className="welcome-subtext">Welcome back to MinervaMed</p>
+          <Button onClick={handleLogout}>Log Out</Button>
+        </div>
       </div>
     </>
   );

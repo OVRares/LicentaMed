@@ -11,6 +11,7 @@ function ConfirmationPageTest() {
 
   const handleLogout = () => {
     axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+    
     navigate("/login");
   };
 

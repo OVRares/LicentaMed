@@ -83,15 +83,12 @@ function SignUpPage() {
     setAlertVisibility(false);
     setAlertText("");
 
-    const id: string = Math.floor(
-      10000000 + Math.random() * 90000000
-    ).toString();
+    const id: string = `REG${Math.floor(10000000 + Math.random() * 90000000)}`;
 
     try {
       const response = await axios.post("http://localhost:5000/signup", {
         user_nume: nume,
         user_prenume: prenume,
-        user_varsta: age,
         user_id: id,
         user_email: email,
         user_parola: password,
@@ -113,67 +110,87 @@ function SignUpPage() {
 
   return (
     <>
-      <div className="page-background">
-        <header className="header">
-          <div className="header-left">
-            <img
-              src="src/assets/logo.png"
-              alt="Company Logo"
-              className="logo"
-            />
-          </div>
-          <div className="header-center"></div>
-        </header>
-        <div className="center-container">
-          <img
+      <div className="page-wrapper">
+        <div className="page-background">
+          <header className="header">
+            <div className="header-left">
+              <img
+                src="src/assets/logo.png"
+                alt="Company Logo"
+                className="logo"
+              />
+            </div>
+            <div className="header-center"></div>
+          </header>
+          <div className="center-container">
+            {/* <img
             src="src/assets/reg_signup.jpg"
             alt="Login Image"
             className="login-image-3"
-          />
-          <div className="signup-box-reg">
-            <TextBox
-              value={nume}
-              onChange={(text) => setNume(text)}
-              placeholder="Nume"
-            ></TextBox>
-            <TextBox
-              value={prenume}
-              onChange={(text) => setPrenume(text)}
-              placeholder="Prenume"
-            ></TextBox>
+          /> */}
+            <div className="signup-box-reg">
+              <TextBox
+                value={nume}
+                onChange={(text) => setNume(text)}
+                placeholder="Nume"
+              ></TextBox>
+              <TextBox
+                value={prenume}
+                onChange={(text) => setPrenume(text)}
+                placeholder="Prenume"
+              ></TextBox>
 
-            <div className="mb-1">
-              <small className="text-muted d-block mb-1">Data nașterii</small>
-              <DateOfBirthPicker onDateChange={(age) => setAge(age)} />
+              <div className="mb-1">
+                <small className="text-muted d-block mb-1">Data nașterii</small>
+                <DateOfBirthPicker onDateChange={(age) => setAge(age)} />
+              </div>
+
+              <TextBox
+                value={email}
+                onChange={(text) => setEmail(text)}
+                placeholder="E-Mail"
+              ></TextBox>
+
+              <TextBox
+                value={password}
+                onChange={(text) => setPassword(text)}
+                placeholder="Parola"
+                type="password"
+              />
+
+              <TextBox
+                value={passwordCheck}
+                onChange={(text) => setPasswordCheck(text)}
+                placeholder="Confirmati Parola"
+                type="password"
+              />
+
+              <Button onClick={signupFinal} color="blue">
+                Sign Up
+              </Button>
+
+              {alertText && <Alert message={alertText} />}
             </div>
-
-            <TextBox
-              value={email}
-              onChange={(text) => setEmail(text)}
-              placeholder="E-Mail"
-            ></TextBox>
-
-            <TextBox
-              value={password}
-              onChange={(text) => setPassword(text)}
-              placeholder="Parola"
-              type="password"
-            />
-
-            <TextBox
-              value={passwordCheck}
-              onChange={(text) => setPasswordCheck(text)}
-              placeholder="Confirmati Parola"
-              type="password"
-            />
-
-            <Button onClick={signupFinal} color="blue">
-              Sign Up
-            </Button>
-
-            {alertText && <Alert message={alertText} />}
           </div>
         </div>
+        <footer className="footer">
+          <div className="footer-container">
+            <div className="footer-column">
+              <h4>About Us</h4>
+              <p>
+                MinervaMed is a modern healthcare platform that connects
+                patients and doctors with ease. We strive to simplify medical
+                appointments, communication, and care.
+              </p>
+            </div>
+
+            <div className="footer-column">
+              <h4>Contact</h4>
+              <p>📞 Phone: +40 123 456 789</p>
+              <p>📧 Email: contact@minervamed.ro</p>
+            </div>
+          </div>
+        </footer>
       </div>
     </>
   );

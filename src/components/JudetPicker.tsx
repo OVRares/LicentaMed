@@ -2,7 +2,8 @@ import React, { useState } from "react";
 
 interface Props {
   value: string;
-  onOptionSelect: (selectedOption: string) => void; // Callback to notify parent
+  onOptionSelect: (selectedOption: string) => void;
+  className?: string;
 }
 
 function JudetPicker({ value, onOptionSelect }: Props) {
@@ -17,7 +18,7 @@ function JudetPicker({ value, onOptionSelect }: Props) {
       value={value}
       onChange={handleChange}
       className="form-select"
-      style={{ color: value ? "black" : "#6c757d" }} // ✅ Dynamically change color
+      style={{ color: value ? "black" : "#6c757d" }}
     >
       <option value="" disabled>
         Judet
