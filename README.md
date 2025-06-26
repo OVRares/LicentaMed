@@ -14,13 +14,13 @@ git clone https://github.com/OVRares/LicentaMed.git
 cd LicentaMed
 npm install
 
-##Comenzi
+## Comenzi
 
-Pornire Doar Fronted
+Pornire Doar Fronted:
 npm run dev
 
-Pornire Doar Backend
+Pornire Doar Backend:
 npm run start-backend
 
-Pornire Complet
+Pornire Complet:
 npm run start
