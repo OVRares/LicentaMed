@@ -11,6 +11,7 @@ function ConfirmationPage() {
 
   const handleLogout = () => {
     axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+    localStorage.removeItem("userRole");
     navigate("/login");
   };
 

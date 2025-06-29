@@ -13,11 +13,11 @@ function SignUpPage() {
   const [passwordCheck, setPasswordCheck] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [nume, setNume] = useState(""); // State for Nume
-  const [prenume, setPrenume] = useState(""); // State for Prenume
+  const [nume, setNume] = useState("");
+  const [prenume, setPrenume] = useState("");
   const [alertVisible, setAlertVisibility] = useState(false);
   const [alertText, setAlertText] = useState("");
-  const [age, setAge] = useState<number | null>(null); // ✅ Only storing age
+  const [age, setAge] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const sendConfirmationEmail = async (
@@ -66,11 +66,19 @@ function SignUpPage() {
     } else if (!password.trim()) {
       setAlertText("Parola nu poate fi goala!");
       return;
+    } else if (
+      !/^.*(?=(?:.*[A-Za-z]){4,})(?=(?:.*\d){2,})(?=.*[!@#$%^&*()_+{}\[\]:;"'<>,.?~\\/-]).*$/.test(
+        password
+      )
+    ) {
+      setAlertText(
+        "Parola trebuie să conțină cel puțin 4 litere, 2 cifre și un caracter special!"
+      );
+      return;
     } else if (password !== passwordCheck) {
       setAlertText("Parolele nu se potrivesc!");
       return;
     }
-
     const emailResponse = await axios.post("http://localhost:5000/checkEmail", {
       user_email: email,
     });
@@ -115,20 +123,17 @@ function SignUpPage() {
           <header className="header">
             <div className="header-left">
               <img
-                src="src/assets/logo.png"
+                src="src/assets/Minerva2.png"
                 alt="Company Logo"
                 className="logo"
               />
+              <span className="logo-text">MinervaMed</span>
             </div>
             <div className="header-center"></div>
           </header>
           <div className="center-container">
-            {/* <img
-            src="src/assets/reg_signup.jpg"
-            alt="Login Image"
-            className="login-image-3"
-          /> */}
-            <div className="signup-box-reg">
+            <div className="signup-box-doc">
+              <h2 className="signup-step-title">Informații Personale</h2>
               <TextBox
                 value={nume}
                 onChange={(text) => setNume(text)}
@@ -186,8 +191,8 @@ function SignUpPage() {
 
             <div className="footer-column">
               <h4>Contact</h4>
-              <p>📞 Phone: +40 123 456 789</p>
-              <p>📧 Email: contact@minervamed.ro</p>
+              <p> Phone: +40 123 456 789</p>
+              <p> Email: contact@minervamed.ro</p>
             </div>
           </div>
         </footer>

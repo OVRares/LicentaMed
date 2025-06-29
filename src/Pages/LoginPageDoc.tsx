@@ -20,6 +20,7 @@ function LoginPageDoc() {
 
   const handleLogout = () => {
     axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+    localStorage.removeItem("userRole");
     navigate("/login");
   };
 
@@ -53,6 +54,7 @@ function LoginPageDoc() {
 
       if (response.status === 200 && response.data.exists) {
         console.log("Login successful");
+        localStorage.setItem("userRole", "doc");
 
         const tokenResponse = await axios.post(
           "http://localhost:5000/api/chat/chatStartDoc",
@@ -87,8 +89,8 @@ function LoginPageDoc() {
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      event.preventDefault(); // ✅ Prevents page refresh
-      handleSignIn(); // ✅ Calls login function
+      event.preventDefault();
+      handleSignIn();
     }
   };
 
@@ -103,6 +105,7 @@ function LoginPageDoc() {
                 alt="Company Logo"
                 className="logo"
               />
+              <span className="logo-text">MinervaMed</span>
             </div>
             <div className="header-center"></div>
           </header>

@@ -14,8 +14,8 @@ function SignUpPageDoc() {
   const [passwordCheck, setPasswordCheck] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [nume, setNume] = useState(""); // State for Nume
-  const [prenume, setPrenume] = useState(""); // State for Prenume
+  const [nume, setNume] = useState("");
+  const [prenume, setPrenume] = useState("");
   const [alertVisible, setAlertVisibility] = useState(false);
   const [alertText, setAlertText] = useState("");
   const [spec, setSelectedSpec] = useState<string>("");
@@ -67,6 +67,15 @@ function SignUpPageDoc() {
     } else if (!password.trim()) {
       setAlertText("Parola nu poate fi goala!");
       return;
+    } else if (
+      !/^.*(?=(?:.*[A-Za-z]){4,})(?=(?:.*\d){2,})(?=.*[!@#$%^&*()_+{}\[\]:;"'<>,.?~\\/-]).*$/.test(
+        password
+      )
+    ) {
+      setAlertText(
+        "Parola trebuie să conțină cel puțin 4 litere, 2 cifre și un caracter special!"
+      );
+      return;
     } else if (password !== passwordCheck) {
       setAlertText("Parolele nu se potrivesc!");
       return;
@@ -87,13 +96,12 @@ function SignUpPageDoc() {
   };
 
   const signupFinal = async () => {
-    // branch 1 ─────────── doctor joins existing office
     if (officeCode.trim()) {
       try {
         const id = `DOC${Math.floor(10000000 + Math.random() * 9_000000)}`;
 
         await axios.post("http://localhost:5000/signupDoctorWithOffice", {
-          office_id: officeCode.trim(), // <- supplied code
+          office_id: officeCode.trim(),
           user_id: id,
           user_nume: nume,
           user_prenume: prenume,
@@ -110,7 +118,6 @@ function SignUpPageDoc() {
       return;
     }
 
-    // branch 2 ─────────── create new office (phone removed)
     if (!officeName.trim()) {
       setAlertText("Denumirea cabinetului nu poate fi goala!");
       return;
@@ -157,10 +164,11 @@ function SignUpPageDoc() {
         <header className="header">
           <div className="header-left">
             <img
-              src="src/assets/logo.png"
+              src="src/assets/Minerva2.png"
               alt="Company Logo"
               className="logo"
             />
+            <span className="logo-text">MinervaMed</span>
           </div>
           <div className="header-center"></div>
         </header>
@@ -239,14 +247,12 @@ function SignUpPageDoc() {
                   placeholder="Adresa"
                 />
 
-                {/* Separator */}
                 <div className="or-separator">
                   <hr className="line" />
                   <span className="or-label">SAU</span>
                   <hr className="line" />
                 </div>
 
-                {/* Existing Office Code */}
                 <TextBox
                   value={officeCode}
                   onChange={setOfficeCode}

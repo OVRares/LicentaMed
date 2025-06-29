@@ -27,6 +27,7 @@ const ChatSplitPageReg = () => {
   const handleLogout = () => {
     axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
     client?.disconnectUser();
+    localStorage.removeItem("userRole");
     navigate("/login");
   };
 
@@ -74,6 +75,7 @@ const ChatSplitPageReg = () => {
               alt="Company Logo"
               className="logo"
             />
+            <span className="logo-text">MinervaMed</span>
           </div>
           <div className="header-center">
             <Button
@@ -101,7 +103,7 @@ const ChatSplitPageReg = () => {
               Chat
             </Button>
             <Button
-              width="80px"
+              width="110px"
               color="blue"
               variant="filled-alt"
               onClick={() => navigate("/search")}
@@ -125,7 +127,7 @@ const ChatSplitPageReg = () => {
         <div className="chat-split-layout">
           <div className="chat-split-container">
             <div className="chat-sidebar">
-              <h2 className="chat-sidebar-title">My Chats</h2>
+              <h2 className="chat-sidebar-title">Conversațiile Mele</h2>
               {channels.map((channel) => (
                 <div
                   key={channel.id}

@@ -32,6 +32,7 @@ function JudetPicker({ value, onOptionSelect }: Props) {
       <option value="Botosani">Botoşani</option>
       <option value="Brasov">Braşov</option>
       <option value="Braila">Brăila</option>
+      <option value="Bucuresti">București</option>
       <option value="Buzău">Buzău</option>
       <option value="Caras-Severin">Severin</option>
       <option value="Calarasi">Călăraşi</option>

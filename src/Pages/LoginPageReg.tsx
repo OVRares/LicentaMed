@@ -19,6 +19,7 @@ function LoginPage() {
 
   const handleLogout = () => {
     axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+    localStorage.removeItem("userRole");
     navigate("/login");
   };
 
@@ -59,6 +60,7 @@ function LoginPage() {
 
       if (response.status === 200 && response.data.exists) {
         console.log("Login successful");
+        localStorage.setItem("userRole", "reg");
 
         const tokenResponse = await axios.post(
           "http://localhost:5000/api/chat/chatStartReg",
@@ -102,6 +104,7 @@ function LoginPage() {
                 alt="Company Logo"
                 className="logo"
               />
+              <span className="logo-text">MinervaMed</span>
             </div>
             <div className="header-center"></div>
           </header>

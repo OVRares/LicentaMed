@@ -59,6 +59,7 @@ function SearchPageTest() {
 
   const handleLogout = () => {
     axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+    localStorage.removeItem("userRole");
     navigate("/login");
   };
 
@@ -91,6 +92,10 @@ function SearchPageTest() {
     setSpec("");
   };
 
+  useEffect(() => {
+    handleSearch();
+  }, [spec, judet]);
+
   return (
     <>
       <header className="header">
@@ -100,6 +105,7 @@ function SearchPageTest() {
             alt="Company Logo"
             className="logo"
           />
+          <span className="logo-text">MinervaMed</span>
         </div>
         <div className="header-center">
           <Button
@@ -127,7 +133,7 @@ function SearchPageTest() {
             Chat
           </Button>
           <Button
-            width="80px"
+            width="110px"
             variant="filled-alt"
             selected={location.pathname === "/search"}
             onClick={() => navigate("/search")}
@@ -177,11 +183,22 @@ function SearchPageTest() {
                 Filtre
               </Button>
 
-              {/* ⬇️ Pop-out panel */}
               {filtersOpen && (
                 <div className="filters-panel">
-                  <SpecPicker value={spec} onOptionSelect={setSpec} />
-                  <JudetPicker value={judet} onOptionSelect={setJudet} />
+                  <SpecPicker
+                    value={spec}
+                    onOptionSelect={(value) => {
+                      setSpec(value);
+                      handleSearch();
+                    }}
+                  />
+                  <JudetPicker
+                    value={judet}
+                    onOptionSelect={(value) => {
+                      setJudet(value);
+                      handleSearch();
+                    }}
+                  />
                   <Button
                     width="160px"
                     onClick={handleResetFilters}
@@ -200,9 +217,7 @@ function SearchPageTest() {
           <div className="result-grid">
             {results.map((office) => (
               <div key={office.office_id} className="result-card">
-                {/* ───────── Avatar + existing content side-by-side ───────── */}
                 <div className="card-row">
-                  {/* avatar on the left */}
                   <img
                     src={
                       office.profile_picture
@@ -213,7 +228,6 @@ function SearchPageTest() {
                     className="result-avatar"
                   />
 
-                  {/* all previous content untouched, wrapped for layout */}
                   <div className="card-content" style={{ flex: 1 }}>
                     <div className="result-header">
                       <div className="office-name">
@@ -273,8 +287,8 @@ function SearchPageTest() {
 
           <div className="footer-column">
             <h4>Contact</h4>
-            <p>📞 Phone: +40 123 456 789</p>
-            <p>📧 Email: contact@minervamed.ro</p>
+            <p> Phone: +40 123 456 789</p>
+            <p> Email: contact@minervamed.ro</p>
           </div>
         </div>
       </footer>

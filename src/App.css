@@ -141,7 +141,7 @@
 
 .signup-box-reg {
   background-color: #ffffff;
-  height: 530px;
+  height: 560px;
   flex-basis: 100%;
   display: flex;
   flex-direction: column;
@@ -543,7 +543,7 @@
     background-repeat: no-repeat; 
     height: 100vh; 
     width: 100%; 
-    overflow: hidden; /
+    overflow: hidden; 
   }
 
 .dob-picker-container{
@@ -2034,7 +2034,7 @@
   box-sizing: border-box;
   color: #333;
   white-space: pre-wrap;    
-  overflow-wrap: break-word; /
+  overflow-wrap: break-word; 
 }
 
 .doctor-gallery-container {
@@ -2279,7 +2279,7 @@ html, body {
 
 .main-content {
   flex: 1; 
-  padding-top: 80px; /
+  padding-top: 80px; 
 }
 
 .footer {

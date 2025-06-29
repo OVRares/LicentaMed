@@ -34,6 +34,7 @@ const ChatSplitPage = () => {
   const handleLogout = () => {
     axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
     client?.disconnectUser();
+    localStorage.removeItem("userRole");
     navigate("/login");
   };
 
@@ -54,7 +55,7 @@ const ChatSplitPage = () => {
 
   useEffect(() => {
     const initChat = async () => {
-      if (!sessionUser) return; // ⛔ don't run until session is ready
+      if (!sessionUser) return;
 
       const token = localStorage.getItem("streamToken");
       const streamUser = JSON.parse(localStorage.getItem("streamUser") || "{}");
@@ -113,6 +114,7 @@ const ChatSplitPage = () => {
               alt="Company Logo"
               className="logo"
             />
+            <span className="logo-text">MinervaMed</span>
           </div>
           <div className="header-center">
             <Button
@@ -263,7 +265,6 @@ const ChatSplitPage = () => {
             <div className="chat-main">
               {client && activeChannel && (
                 <>
-                  {/* The actual chat UI */}
                   <Chat client={client} theme="messaging light">
                     <Channel channel={activeChannel}>
                       <Window>
@@ -336,8 +337,8 @@ const ChatSplitPage = () => {
 
             <div className="footer-column">
               <h4>Contact</h4>
-              <p>📞 Phone: +40 123 456 789</p>
-              <p>📧 Email: contact@minervamed.ro</p>
+              <p> Phone: +40 123 456 789</p>
+              <p> Email: contact@minervamed.ro</p>
             </div>
           </div>
         </footer>
@@ -347,5 +348,3 @@ const ChatSplitPage = () => {
 };
 
 export default ChatSplitPage;
-
-///DE REAFISAT BUTONUL CARE TRIMITE MESAJUL PERSONALIZAT

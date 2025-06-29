@@ -20,7 +20,7 @@ function DoctorAbout() {
   const [editedAboutText, setEditedAboutText] = useState("");
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const { doctorId } = useParams();
-  const isVisitor = Boolean(doctorId); // page loaded with /doctor-about/:doctorId
+  const isVisitor = Boolean(doctorId);
   const isRegularUser = user?.role === "reg";
   const isDoctor = user?.role !== "reg" && !isVisitor;
 
@@ -59,6 +59,28 @@ function DoctorAbout() {
     window.open(mapsUrl, "_blank");
   };
 
+  const handleLogout = async (): Promise<void> => {
+    try {
+      const client = StreamChat.getInstance("vs9hb5583yhf");
+
+      if (client.userID) {
+        await client.disconnectUser();
+        console.log("Disconnected from StreamChat");
+      }
+
+      await axios.post(
+        "http://localhost:5000/logout",
+        {},
+        { withCredentials: true }
+      );
+      client?.disconnectUser;
+      localStorage.removeItem("userRole");
+      navigate("/login");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       setImage(e.target.files[0]);
@@ -69,7 +91,6 @@ function DoctorAbout() {
     if (!user) return;
 
     try {
-      // Upload profile image
       if (image) {
         const formData = new FormData();
         formData.append("image", image);
@@ -84,10 +105,9 @@ function DoctorAbout() {
           }
         );
 
-        console.log("✅ Profile image uploaded:", uploadRes.data.filename);
+        console.log(" Profile image uploaded:", uploadRes.data.filename);
       }
 
-      // Upload gallery images
       if (newGalleryImages.length > 0) {
         const galleryForm = new FormData();
         newGalleryImages.forEach((img) => galleryForm.append("images", img));
@@ -102,10 +122,9 @@ function DoctorAbout() {
           }
         );
 
-        console.log("✅ Gallery images uploaded");
+        console.log(" Gallery images uploaded");
       }
 
-      // Save profile bio and about text
       await axios.post(
         "http://localhost:5000/about/updateProfile",
         {
@@ -117,7 +136,6 @@ function DoctorAbout() {
         { withCredentials: true }
       );
 
-      // Optionally save services (if present)
       if (services.length > 0) {
         await axios.post(
           "http://localhost:5000/about/saveServices",
@@ -130,7 +148,6 @@ function DoctorAbout() {
         console.log("✅ Services saved");
       }
 
-      // Save office details
       await axios.post(
         "http://localhost:5000/about/updateOfficeDetails",
         {
@@ -143,7 +160,6 @@ function DoctorAbout() {
         { withCredentials: true }
       );
 
-      // Update UI state
       setAboutData((prev: any) => ({
         ...prev,
         bio: editedBio,
@@ -160,7 +176,7 @@ function DoctorAbout() {
       setIsEditing(false);
       alert("Profile saved!");
     } catch (err) {
-      console.error("❌ Save error:", err);
+      console.error(" Save error:", err);
       alert("Could not save profile.");
     }
   };
@@ -202,7 +218,7 @@ function DoctorAbout() {
 
     const channel = client.channel("messaging", channelId, {
       members: [streamUser.id, doctorId],
-      name: `Conversație Dr. ${aboutData.nume || "Doctor"} - ${
+      name: `Conversație Dr. ${aboutData.doctor_nume || "Doctor"} - ${
         streamUser.name || "Utilizator"
       }`,
     });
@@ -232,14 +248,13 @@ function DoctorAbout() {
         setUser(currentUser);
 
         if (currentUser && currentUser.role !== "reg" && doctorId) {
-          navigate("/about"); // redirect non-reg users to their own page
+          navigate("/about");
           return;
         }
 
         const targetDoctorId = doctorId || currentUser?.uid;
         if (!targetDoctorId) return;
 
-        // Fetch profile info
         const aboutRes = await axios.get(
           `http://localhost:5000/about/doctorOffice/${targetDoctorId}`,
           { withCredentials: true }
@@ -253,14 +268,12 @@ function DoctorAbout() {
         setOfficeCity(aboutRes.data.oras || "");
         setOfficeAddress(aboutRes.data.adresa || "");
 
-        // Fetch gallery images
         const galleryRes = await axios.get(
           `http://localhost:5000/about/galleryImages/${targetDoctorId}`,
           { withCredentials: true }
         );
         setGalleryImages(galleryRes.data.map((img: any) => img.image_url));
 
-        // Fetch services
         const servicesRes = await axios.get(
           `http://localhost:5000/about/fetchServices/${targetDoctorId}`,
           { withCredentials: true }
@@ -278,7 +291,7 @@ function DoctorAbout() {
         });
         setServices(paddedServices);
       } catch (err) {
-        console.error("❌ Data fetch failed:", err);
+        console.error(" Data fetch failed:", err);
         setUser(null);
       } finally {
         setLoading(false);
@@ -355,7 +368,7 @@ function DoctorAbout() {
             color="blue"
             variant="filled-alt"
             width="80px"
-            onClick={() => navigate("/login")}
+            onClick={handleLogout}
           >
             Logout
           </Button>
@@ -395,7 +408,6 @@ function DoctorAbout() {
 
                 {isEditing && (
                   <>
-                    {/* Always show blue "+" in center */}
                     <label className="profile-image-overlay center-plus">
                       +
                       <input
@@ -406,7 +418,6 @@ function DoctorAbout() {
                       />
                     </label>
 
-                    {/* Show "×" only when there's something to delete */}
                     {(image || aboutData?.profile_picture) && (
                       <button
                         className="profile-image-overlay top-right-x"
@@ -427,9 +438,7 @@ function DoctorAbout() {
             </div>
 
             <div className="about-text-section">
-              {/* ───── top row: doctor (left)  |  office (right) ───── */}
               <div className="doctor-header-row">
-                {/* LEFT column – doctor */}
                 <div className="doctor-col">
                   <h1 className="doctor-name">
                     {aboutData?.doctor_nume || aboutData?.nume
@@ -454,7 +463,6 @@ function DoctorAbout() {
                   )}
                 </div>
 
-                {/* RIGHT column – office info (read-only, doctor only) */}
                 {!isEditing && (
                   <div className="office-col">
                     {officeName && (
@@ -469,7 +477,6 @@ function DoctorAbout() {
                 )}
               </div>
 
-              {/* ───── address + chat button remain as before ───── */}
               {!isEditing ? (
                 <>
                   <p className="doctor-address">
@@ -513,7 +520,6 @@ function DoctorAbout() {
                   )}
                 </>
               ) : (
-                /* existing office-edit-grid stays unchanged */
                 <div className="office-edit-grid">
                   <div className="office-input-group full-width">
                     <label className="office-label">Office Name:</label>
@@ -526,17 +532,59 @@ function DoctorAbout() {
                   </div>
 
                   <div className="office-input-group">
-                    <label className="office-label">County:</label>
-                    <input
-                      type="text"
+                    <label className="office-label">Judet:</label>
+                    <select
                       value={officeCounty}
                       onChange={(e) => setOfficeCounty(e.target.value)}
                       className="office-input"
-                    />
+                    >
+                      <option value="Alba">Alba</option>
+                      <option value="Arad">Arad</option>
+                      <option value="Arges">Argeş</option>
+                      <option value="Bacau">Bacău</option>
+                      <option value="Bihor">Bihor</option>
+                      <option value="Bistria-Nasaud">Bistriţa</option>
+                      <option value="Botosani">Botoşani</option>
+                      <option value="Brasov">Braşov</option>
+                      <option value="Braila">Brăila</option>
+                      <option value="Bucuresti">București</option>
+                      <option value="Buzău">Buzău</option>
+                      <option value="Caras-Severin">Severin</option>
+                      <option value="Calarasi">Călăraşi</option>
+                      <option value="Cluj">Cluj</option>
+                      <option value="Constanta">Constanţa</option>
+                      <option value="Covasna">Covasna</option>
+                      <option value="Dambovita">Dâmboviţa</option>
+                      <option value="Dolj">Dolj</option>
+                      <option value="Galati">Galaţi</option>
+                      <option value="Giurgiu">Giurgiu</option>
+                      <option value="Gorj">Gorj</option>
+                      <option value="Harghita">Harghita</option>
+                      <option value="Hunedoara">Hunedoara</option>
+                      <option value="Ialomita">Ialomiţa</option>
+                      <option value="Iasi">Iaşi</option>
+                      <option value="Ilfov">Ilfov</option>
+                      <option value="Maramures">Maramureş</option>
+                      <option value="Mehedinti">Mehedinţi</option>
+                      <option value="Mures">Mureş</option>
+                      <option value="Neamt">Neamţ</option>
+                      <option value="Olt">Olt</option>
+                      <option value="Prahova">Prahova</option>
+                      <option value="Satu Mare">Satu Mare</option>
+                      <option value="Salaj">Sălaj</option>
+                      <option value="Sibiu">Sibiu</option>
+                      <option value="Suceava">Suceava</option>
+                      <option value="Teleorman">Teleorman</option>
+                      <option value="Timis">Timiş</option>
+                      <option value="Tulcea">Tulcea</option>
+                      <option value="Vaslui">Vaslui</option>
+                      <option value="Valcea">Vâlcea</option>
+                      <option value="Vrancea">Vrancea</option>
+                    </select>
                   </div>
 
                   <div className="office-input-group">
-                    <label className="office-label">City:</label>
+                    <label className="office-label">Oras:</label>
                     <input
                       type="text"
                       value={officeCity}
@@ -590,7 +638,6 @@ function DoctorAbout() {
 
           <div className="gallery-card">
             <div className="image-grid">
-              {/* Previously saved images */}
               {galleryImages.map((imgUrl, index) => (
                 <div className="image-wrapper" key={`saved-${index}`}>
                   <img
@@ -613,7 +660,6 @@ function DoctorAbout() {
                 </div>
               ))}
 
-              {/* Newly selected (unsaved) images */}
               {newGalleryImages.map((img, index) => (
                 <div className="image-wrapper" key={`new-${index}`}>
                   <img
@@ -627,7 +673,6 @@ function DoctorAbout() {
                 </div>
               ))}
 
-              {/* Upload box (only in edit mode) */}
               {isEditing && (
                 <label className="image-upload-box">
                   +

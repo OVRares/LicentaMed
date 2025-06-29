@@ -22,7 +22,7 @@ const PatientAppointmentsPage = () => {
     { code: "FAM", label: "Family Medicine" },
     { code: "DRM", label: "Dermatology" },
     { code: "OFT", label: "Ophthalmology" },
-    { code: "ORL", label: "ENT" }, // ORL = Ear, Nose, Throat
+    { code: "ORL", label: "ENT" },
     { code: "PSI", label: "Psychology" },
     { code: "NEU", label: "Neurology" },
     { code: "PED", label: "Pediatrics" },
@@ -58,6 +58,7 @@ const PatientAppointmentsPage = () => {
 
   const handleLogout = () => {
     axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+    localStorage.removeItem("userRole");
     navigate("/login");
   };
 
@@ -154,6 +155,7 @@ const PatientAppointmentsPage = () => {
               alt="Company Logo"
               className="logo"
             />
+            <span className="logo-text">MinervaMed</span>
           </div>
           <div className="header-center">
             <Button
@@ -182,7 +184,7 @@ const PatientAppointmentsPage = () => {
               Chat
             </Button>
             <Button
-              width="80px"
+              width="110px"
               variant="filled-alt"
               onClick={() => navigate("/search")}
               color="blue"
@@ -205,7 +207,7 @@ const PatientAppointmentsPage = () => {
         <div className="doc-appointments-page">
           <div className="doc-appointments-layout">
             <section className="doc-appointments-container">
-              <h2 className="doc-appointments-title">Programări</h2>
+              <h2>Programări</h2>
 
               <div className="doc-appointments-controls">
                 <select
@@ -225,7 +227,6 @@ const PatientAppointmentsPage = () => {
                   ))}
                 </select>
 
-                {/* Button pushed to the right */}
                 <button
                   onClick={() => setShowCompleted((prev) => !prev)}
                   className={`doc-appointments-toggle-button ${
@@ -238,11 +239,9 @@ const PatientAppointmentsPage = () => {
                 </button>
               </div>
 
-              {/* --------------------------- LIST CONTENT --------------------------- */}
               {filteredAppointments.length === 0 ? (
                 <p>No matching appointments found.</p>
               ) : showCompleted ? (
-                /*  COMPLETED view – unchanged  */
                 Object.entries(groupedByMonth).map(([monthKey, monthApps]) => {
                   const isMonthExpanded = expandedMonths.has(monthKey);
                   return (
@@ -334,7 +333,6 @@ const PatientAppointmentsPage = () => {
                   );
                 })
               ) : (
-                /*  PENDING / CONFIRMED view – cards always expanded  */
                 filteredAppointments.map((appointment) => (
                   <div
                     key={appointment.app_id}
@@ -383,8 +381,6 @@ const PatientAppointmentsPage = () => {
                 ))
               )}
             </section>
-
-            {/* ───────────────────── 2) FILTER BOX (right / fixed) ───────────────────── */}
           </div>
         </div>
         <footer className="footer">

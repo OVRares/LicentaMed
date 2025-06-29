@@ -142,7 +142,7 @@ app.post("/signup", async (req: Request, res: Response): Promise<void> => {
     const confirmationToken = crypto.randomBytes(32).toString("hex");
 
     await pool.query(
-      "INSERT INTO users_reg (id, nume, prenume, email, parola, confirmare, conf_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO users_reg (id, nume, prenume, email, parola, confirmare, conf_token) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [user_id, user_nume,  user_prenume, user_email,user_hashed_password, 0, confirmationToken]
     );
 
@@ -352,7 +352,6 @@ app.get("/appointmentsTodayCount", async (req, res) => {
 
 app.get("/fetchOffices", async (req: Request, res: Response): Promise<void> => {
   const { q, judet, spec } = req.query;
-
   let sql = `
     SELECT
       o.office_id,
@@ -360,7 +359,6 @@ app.get("/fetchOffices", async (req: Request, res: Response): Promise<void> => {
       o.oras,
       o.judet,
       o.adresa,
-      o.tel,
 
       d.id                AS doctor_id,
       d.nume              AS doctor_nume,
@@ -370,8 +368,8 @@ app.get("/fetchOffices", async (req: Request, res: Response): Promise<void> => {
       a.bio               AS doctor_bio,
       a.profile_picture   AS profile_picture
     FROM doc_office o
-    LEFT JOIN users_doc  d ON o.office_id = d.office_id
-    LEFT JOIN doc_about  a ON a.id        = d.id            -- 👈 2nd join
+    INNER JOIN users_doc  d ON o.office_id = d.office_id
+    LEFT JOIN doc_about  a ON a.id        = d.id            
     WHERE 1 = 1
   `;
   const params: any[] = [];
@@ -920,8 +918,6 @@ app.get("/about/doctorOffice/:uid", async (req: Request, res: Response): Promise
       o.oras,
       o.judet,
       o.adresa,
-      o.tel,
-      o.spec,
       d.id AS doctor_id,
       d.nume AS doctor_nume,
       d.prenume AS doctor_prenume,
@@ -1051,13 +1047,12 @@ app.post("/about/deleteGalleryImage", async (req: Request, res: Response):Promis
   }
 
   try {
-    // Delete from DB
+
     await pool.query(
       "DELETE FROM doc_images WHERE doctor_id = ? AND image_url = ?",
       [doctorId, imageUrl]
     );
 
-    // Delete from filesystem
     const filePath = path.join(__dirname, "uploads", imageUrl);
     fs.unlink(filePath, (err) => {
       if (err && err.code !== "ENOENT") {

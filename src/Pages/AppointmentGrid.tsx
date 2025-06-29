@@ -1,4 +1,3 @@
-// Refactored Appointment Grid with real CSS Grid
 import React, { useState, useEffect, useRef } from "react";
 import {
   format,
@@ -9,6 +8,7 @@ import {
   startOfWeek,
   addWeeks,
   addDays,
+  addMonths,
 } from "date-fns";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -16,15 +16,14 @@ import { StreamChat } from "stream-chat";
 import { response } from "express";
 import Button from "../components/Button";
 
-// Types
 interface Appointment {
-  app_id: string; // e.g. "Consultation"
-  date: string; // e.g. "2025-05-01"
-  startTime: string; // "09:00"
-  endTime: string; // "10:30"
+  app_id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
   name: string;
   description: string;
-  status?: string; // Optional status field
+  status?: string;
 }
 
 const generateTimeSlots = () => {
@@ -37,7 +36,7 @@ const generateTimeSlots = () => {
 };
 
 const timeSlots = generateTimeSlots();
-const currentMonth = new Date(); // June, if today is June
+const currentMonth = addMonths(new Date(), 1);
 
 const AppointmentGridModal = () => {
   const location = useLocation();
@@ -76,6 +75,7 @@ const AppointmentGridModal = () => {
 
   const handleLogout = () => {
     axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+    localStorage.removeItem("userRole");
     navigate("/login");
     client?.disconnectUser;
   };
@@ -90,34 +90,28 @@ const AppointmentGridModal = () => {
     if (!selectedAppointment) return;
 
     try {
-      // 1️⃣  Update backend (still send "notes", because that’s what the API expects)
       await axios.post(
         "http://localhost:5000/updateAppointment",
         {
           appId: selectedAppointment.app_id,
-          notes: editableDescription, // backend param
+          notes: editableDescription,
         },
         { withCredentials: true }
       );
 
-      // 2️⃣  Patch the master list so every grid/list view has the new description
       setAppointments((prev) =>
         prev.map((a) =>
           a.app_id === selectedAppointment.app_id
-            ? { ...a, description: editableDescription } // <- correct field
+            ? { ...a, description: editableDescription }
             : a
         )
       );
 
-      // 3️⃣  Patch the modal copy so the textarea keeps the new value
       setSelectedAppointment((prev) =>
         prev ? { ...prev, description: editableDescription } : prev
       );
-
-      // (optional) close the modal or show a toast:
-      // setShowDeleteModal(false);
     } catch (err) {
-      console.error("❌ Failed to update description:", err);
+      console.error(" Failed to update description:", err);
       alert("Could not save notes.");
     }
   };
@@ -224,7 +218,7 @@ const AppointmentGridModal = () => {
 
   useEffect(() => {
     const fetchPatientName = async () => {
-      if (!patient_Id) return; // no need to fetch if not linked to chat
+      if (!patient_Id) return;
 
       try {
         const response = await axios.get("http://localhost:5000/patientName", {
@@ -233,9 +227,7 @@ const AppointmentGridModal = () => {
         });
 
         setPatientName(response.data.fullName);
-      } catch {
-        // No need to set an error – silently continue
-      }
+      } catch {}
     };
 
     fetchPatientName();
@@ -260,7 +252,6 @@ const AppointmentGridModal = () => {
     const dateString = format(date, "yyyy-MM-dd");
     const slotTime = parse(time, "HH:mm", new Date());
 
-    // 🔍 Is there already an appointment that covers this slot?
     const existing = appointments.find((a) => {
       if (a.date !== dateString) return false;
       const start = parse(a.startTime, "HH:mm", new Date());
@@ -269,26 +260,20 @@ const AppointmentGridModal = () => {
     });
 
     if (existing) {
-      // open the edit / delete modal instead
       setSelectedAppointment(existing);
       setSelectedCell({ date: existing.date, time: existing.startTime });
       setShowDeleteModal(true);
       return;
     }
 
-    /* ------------------------------------------------------------------
-     NEW: build a list of durations that don’t collide with other
-     appointments on the same day.
-  ------------------------------------------------------------------ */
-
-    const selectedSlotIndex = timeSlots.indexOf(time); // index in 30-min array
-    const durations: number[] = []; // will hold 30 / 60 / 90 / 120
+    const selectedSlotIndex = timeSlots.indexOf(time);
+    const durations: number[] = [];
 
     const dateAppointments = appointments.filter((a) => a.date === dateString);
 
     const isSlotFree = (startIdx: number, blockCount: number): boolean => {
       for (let i = 0; i < blockCount; i++) {
-        const slotLabel = timeSlots[startIdx + i]; // e.g. "14:30"
+        const slotLabel = timeSlots[startIdx + i];
         const slotStart = parse(slotLabel, "HH:mm", new Date());
 
         const overlaps = dateAppointments.some((a) => {
@@ -297,7 +282,7 @@ const AppointmentGridModal = () => {
           return slotStart >= aStart && slotStart < aEnd;
         });
 
-        if (overlaps) return false; // a conflicting booking found
+        if (overlaps) return false;
       }
       return true;
     };
@@ -310,16 +295,13 @@ const AppointmentGridModal = () => {
       }
     }
 
-    /* ------------------------------------------------------------------ */
-
-    // ⬇ open the “New Appointment” modal, passing the allowed durations
-    setAllowedDurations(durations); // ← state you already created
+    setAllowedDurations(durations);
     setSelectedCell({ date: dateString, time });
     setModalDate(date);
     setModalTime(time);
     setFormData({
       name: "",
-      duration: String(durations[0] || 30), // default to first valid (or 30)
+      duration: String(durations[0] || 30),
       description: "",
     });
     setModalOpen(true);
@@ -347,7 +329,7 @@ const AppointmentGridModal = () => {
 
     setShowDeleteModal(false);
     setSelectedAppointment(null);
-    setSelectedCell(null); // ✅
+    setSelectedCell(null);
   };
 
   const handleCreateAppointment = () => {
@@ -355,11 +337,10 @@ const AppointmentGridModal = () => {
 
     const dateString = format(modalDate, "yyyy-MM-dd");
     const slotTime = parse(modalTime, "HH:mm", new Date());
-    const selectedSlotIndex = timeSlots.indexOf(modalTime); // e.g. "15:00"
+    const selectedSlotIndex = timeSlots.indexOf(modalTime);
     const maxAvailableSlots = timeSlots.length - selectedSlotIndex;
     const requestedSlots = parseInt(formData.duration, 10) / 30;
 
-    // Clamp to max remaining slots
     const actualSlots = Math.min(requestedSlots, maxAvailableSlots);
     const actualDuration = actualSlots * 30;
 
@@ -409,7 +390,7 @@ const AppointmentGridModal = () => {
           ...prev,
           {
             ...newAppointment,
-            app_id: appId, // ✅ Include the ID returned from the backend
+            app_id: appId,
           },
         ]);
         setModalOpen(false);
@@ -438,6 +419,7 @@ const AppointmentGridModal = () => {
               alt="Company Logo"
               className="logo"
             />
+            <span className="logo-text">MinervaMed</span>
           </div>
           <div className="header-center">
             <Button
@@ -500,9 +482,7 @@ const AppointmentGridModal = () => {
         </header>
 
         <div className="layout-container">
-          {/* Left Column */}
           <div className="left-column">
-            {/* Appointment List */}
             <div className="appointment-list">
               <h3 style={{ marginTop: 0 }}>Programările Săptămânii</h3>
 
@@ -613,7 +593,6 @@ const AppointmentGridModal = () => {
             </div>
 
             <div className="calendar-grid">
-              {/* Header Row */}
               <div className="grid-time-col" />
               {currentWeekDates.map((date) => (
                 <div key={date.toISOString()} className="grid-day-header">
@@ -621,10 +600,8 @@ const AppointmentGridModal = () => {
                 </div>
               ))}
 
-              {/* Time slots */}
               {timeSlots.map((slot) => (
                 <React.Fragment key={slot}>
-                  {/* Time column cell */}
                   <div className="grid-time-col">
                     {(() => {
                       const slotStart = parse(slot, "HH:mm", new Date());
@@ -636,12 +613,10 @@ const AppointmentGridModal = () => {
                     })()}
                   </div>
 
-                  {/* Day columns */}
                   {currentWeekDates.map((date) => {
                     const dateStr = format(date, "yyyy-MM-dd");
                     const slotTime = parse(slot, "HH:mm", new Date());
 
-                    // Check if there's an appointment at this slot
                     const appointment = appointments.find((a) => {
                       if (a.date !== dateStr) return false;
                       const start = parse(a.startTime, "HH:mm", new Date());
@@ -663,10 +638,8 @@ const AppointmentGridModal = () => {
 
                     const rowSpan = duration / 30;
 
-                    // ⛔️ Skip rendering non-start appointment slots
                     if (appointment && !isStartBlock) return null;
 
-                    // ✅ Render the cell
                     return (
                       <div
                         key={`${dateStr}-${slot}`}
@@ -709,9 +682,9 @@ const AppointmentGridModal = () => {
                   backgroundColor: "#fff",
                   padding: "32px",
                   borderRadius: "12px",
-                  width: "600px", // ✅ wider modal
+                  width: "600px",
                   maxWidth: "90vw",
-                  fontSize: "18px", // ✅ larger base text
+                  fontSize: "18px",
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
                   display: "flex",
                   flexDirection: "column",
@@ -843,8 +816,8 @@ const AppointmentGridModal = () => {
                   padding: "32px",
                   borderRadius: "12px",
                   width: "100%",
-                  maxWidth: "600px", // ⬅ wider
-                  fontSize: "18px", // ⬅ larger text
+                  maxWidth: "600px",
+                  fontSize: "18px",
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
                   display: "flex",
                   flexDirection: "column",
@@ -897,7 +870,6 @@ const AppointmentGridModal = () => {
                 >
                   <span style={{ fontSize: "16px" }}>Anulare Programare?</span>
 
-                  {/* custom toggle */}
                   <label
                     style={{
                       position: "relative",
@@ -907,7 +879,6 @@ const AppointmentGridModal = () => {
                       cursor: "pointer",
                     }}
                   >
-                    {/* hidden checkbox keeps the state */}
                     <input
                       type="checkbox"
                       checked={deleteEnabled}
@@ -919,7 +890,6 @@ const AppointmentGridModal = () => {
                       }}
                     />
 
-                    {/* track */}
                     <span
                       style={{
                         position: "absolute",
@@ -933,7 +903,6 @@ const AppointmentGridModal = () => {
                       }}
                     />
 
-                    {/* thumb */}
                     <span
                       style={{
                         position: "absolute",
@@ -957,7 +926,6 @@ const AppointmentGridModal = () => {
                     marginTop: "24px",
                   }}
                 >
-                  {/* Left side: Delete */}
                   <Button
                     onClick={handleCancelAppointment}
                     color="blue"
@@ -968,7 +936,6 @@ const AppointmentGridModal = () => {
                     Cancel Appointment
                   </Button>
 
-                  {/* Right side: Cancel + Save */}
                   <div style={{ display: "flex", gap: "12px" }}>
                     <Button
                       onClick={() => setShowDeleteModal(false)}
@@ -982,7 +949,7 @@ const AppointmentGridModal = () => {
                     <Button
                       onClick={() => {
                         handleUpdateDescription();
-                        setShowDeleteModal(false); // ✅ Auto-close modal
+                        setShowDeleteModal(false);
                       }}
                       color="blue"
                       width="140px"
@@ -1008,8 +975,8 @@ const AppointmentGridModal = () => {
 
             <div className="footer-column">
               <h4>Contact</h4>
-              <p>📞 Phone: +40 123 456 789</p>
-              <p>📧 Email: contact@minervamed.ro</p>
+              <p> Phone: +40 123 456 789</p>
+              <p> Email: contact@minervamed.ro</p>
             </div>
           </div>
         </footer>

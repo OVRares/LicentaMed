@@ -29,6 +29,7 @@ function Profile() {
 
   const handleLogout = () => {
     axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+    localStorage.removeItem("userRole");
     navigate("/login");
   };
 
@@ -38,6 +39,7 @@ function Profile() {
         <div className="header-left">
           <img src="src/assets/logo.png" alt="Company Logo" className="logo" />
         </div>
+        <span className="logo-text">MinervaMed</span>
         <div className="header-center">
           <Button
             onClick={() => navigate("/login")}

@@ -21,7 +21,7 @@ function MainPage2() {
 
   useEffect(() => {
     if (user && user.role !== "reg") {
-      console.log("Fetching today's appointments for:", user.uid); // ✅ LOG
+      console.log("Fetching today's appointments for:", user.uid);
 
       axios
         .get("http://localhost:5000/appointmentsTodayCount", {
@@ -29,11 +29,11 @@ function MainPage2() {
           withCredentials: true,
         })
         .then((res) => {
-          console.log("Appointment count response:", res.data); // ✅ LOG
+          console.log("Appointment count response:", res.data);
           setTodayCount(res.data.count);
         })
         .catch((err) => {
-          console.error("Error fetching appointment count:", err); // ✅ LOG
+          console.error("Error fetching appointment count:", err);
           setTodayCount(0);
         });
     }
@@ -54,6 +54,7 @@ function MainPage2() {
         { withCredentials: true }
       );
       client?.disconnectUser;
+      localStorage.removeItem("userRole");
       navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
@@ -162,6 +163,7 @@ function MainPage2() {
                   Appointments
                 </Button>
                 <Button
+                  width="80px"
                   color="blue"
                   variant="filled-alt"
                   onClick={() => navigate("/login")}
@@ -169,6 +171,7 @@ function MainPage2() {
                   Chat
                 </Button>
                 <Button
+                  width="110px"
                   color="blue"
                   variant="filled-alt"
                   onClick={() => navigate("/login")}
@@ -288,8 +291,8 @@ function MainPage2() {
 
             <div className="footer-column">
               <h4>Contact</h4>
-              <p>📞 Phone: +40 123 456 789</p>
-              <p>📧 Email: contact@minervamed.ro</p>
+              <p> Phone: +40 123 456 789</p>
+              <p> Email: contact@minervamed.ro</p>
             </div>
           </div>
         </footer>

@@ -5,13 +5,13 @@ import Button from "../components/Button";
 import { StreamChat } from "stream-chat";
 
 interface Appointment {
-  app_id: string; // e.g. "Consultation"
-  date: string; // e.g. "2025-05-01"
-  startTime: string; // "09:00"
-  endTime: string; // "10:30"
+  app_id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
   name: string;
   description: string;
-  status: string; // Optional field for completed appointments
+  status: string;
 }
 
 const AppointmentsPage = () => {
@@ -19,6 +19,7 @@ const AppointmentsPage = () => {
   const location = useLocation();
   const handleLogout = () => {
     axios.post("http://localhost:5000/logout", {}, { withCredentials: true });
+    localStorage.removeItem("userRole");
     navigate("/login");
   };
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -56,7 +57,7 @@ const AppointmentsPage = () => {
     const date = new Date(app.date);
     const monthKey = `${date.getFullYear()}-${String(
       date.getMonth() + 1
-    ).padStart(2, "0")}`; // e.g. 2025-05
+    ).padStart(2, "0")}`;
 
     if (!acc[monthKey]) acc[monthKey] = [];
     acc[monthKey].push(app);
@@ -116,7 +117,7 @@ const AppointmentsPage = () => {
         { withCredentials: true }
       );
 
-      alert("✅ Appointment marked as completed!");
+      alert(" Appointment marked as completed!");
 
       setAppointments((prev) =>
         prev.map((app) =>
@@ -158,6 +159,7 @@ const AppointmentsPage = () => {
               alt="Company Logo"
               className="logo"
             />
+            <span className="logo-text">MinervaMed</span>
           </div>
 
           <div className="header-center">
@@ -221,7 +223,7 @@ const AppointmentsPage = () => {
 
         <div className="doc-appointments-page">
           <div className="doc-appointments-container">
-            <h2>Your Appointments</h2>
+            <h2>Programări</h2>
 
             <div className="doc-appointments-toggle-wrapper">
               <button
@@ -435,8 +437,8 @@ const AppointmentsPage = () => {
 
             <div className="footer-column">
               <h4>Contact</h4>
-              <p>📞 Phone: +40 123 456 789</p>
-              <p>📧 Email: contact@minervamed.ro</p>
+              <p> Phone: +40 123 456 789</p>
+              <p> Email: contact@minervamed.ro</p>
             </div>
           </div>
         </footer>
